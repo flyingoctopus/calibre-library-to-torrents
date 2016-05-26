@@ -6,7 +6,6 @@ import com.frostwire.jlibtorrent.swig.error_code;
 import com.frostwire.jlibtorrent.swig.file_storage;
 import com.frostwire.jlibtorrent.swig.libtorrent;
 import com.calibre.torrents.DataSources;
-import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
@@ -17,6 +16,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -139,7 +139,7 @@ public class Tools {
 
 			File currentJar = new File(Tools.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 
-			File tmpResourcesFolder = Files.createTempDir();
+			File tmpResourcesFolder = Files.createTempDirectory(".").toFile();
 
 			DataSources.SOURCE_CODE_HOME = tmpResourcesFolder;
 
@@ -149,7 +149,7 @@ public class Tools {
 			Tools.unzip(currentJar, tmpResourcesFolder);
 
 
-		} catch(URISyntaxException e) {
+		} catch(URISyntaxException | IOException e) {
 			e.printStackTrace();
 		}
 	}
