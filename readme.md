@@ -1,6 +1,6 @@
 [Calibre Library to Torrents]() &mdash; Convert your Calibre Library Books to Torrents
 ==========
-![](http://img.shields.io/version/0.0.1.png?color=green)
+![](http://img.shields.io/version/0.0.2.png?color=green)
 
 
 [Change log](https://github.com/tchoulihan/calibre-library-to-torrents/releases)
@@ -19,11 +19,11 @@ The torrent file is intelligently named, to:
 
 ### Requirements
 - Java 8
-- [Download calibre-library-to-torrents.jar](https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.1/calibre-library-to-torrents.jar)
+- [Download calibre-library-to-torrents.jar](https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.2/calibre-library-to-torrents.jar)
 
 ## Usage
 ```sh
-wget https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.1/calibre-library-to-torrents.jar
+wget https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.2/calibre-library-to-torrents.jar
 java -jar calibre-library-to-torrents.jar -calibre_dir ~/Calibre\ Library/ -torrents_dir save_dir/
 ```
 ## Building from scratch
