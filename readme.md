@@ -7,8 +7,8 @@
 
 
 Calibre Library to Torrents takes your Calibre library, and creates individual book torrents, containing a folder of:
-* All formats of the book you currently have on your machine(often `epub`, `pdf`)
-* The `cover jpg`
+* All formats of the book you currently have saved(often `epub`, `pdf`)
+* The `cover.jpg`
 * A `metadata.opf` containing metadata about the book
 
 The torrent file is intelligently named, to:
@@ -29,7 +29,7 @@ java -jar calibre-library-to-torrents.jar -calibre_dir ~/Calibre\ Library/ -torr
 
 To build CalibreToTorrents, run the following commands:
 ```sh
-git clone https://github.com/tchoulihan/calibre-library-to-torrent
+git clone https://github.com/tchoulihan/calibre-library-to-torrents
 cd calibre-library-to-torrents
 chmod +x install.sh
 
