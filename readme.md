@@ -17,11 +17,9 @@ The torrent file is intelligently named, to:
 
 ## Installation
 
-[Download calibre-library-to-torrents.jar](https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.1/calibre-library-to-torrents.jar)
-
 ### Requirements
 - Java 8
-
+- [Download calibre-library-to-torrents.jar](https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.1/calibre-library-to-torrents.jar)
 
 ## Usage
 ```sh
