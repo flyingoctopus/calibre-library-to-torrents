@@ -16,6 +16,9 @@ The torrent file is intelligently named, to:
 
 
 ## Installation
+
+[Download calibre-library-to-torrents.jar](https://github.com/tchoulihan/calibre-library-to-torrents/releases/download/0.0.1/calibre-library-to-torrents.jar)
+
 ### Requirements
 - Java 8
 
@@ -41,4 +44,5 @@ chmod +x install.sh
 Have a bug or a feature request? If your issue isn't [already listed](https://github.com/tchoulihan/calibre-library-to-torrents/issues/), then open a [new issue here](https://github.com/tchoulihan/calibre-library-to-torrents/issues/new).
 
 ## Feature requests / TODOS
+* A front end with javaFX
 
