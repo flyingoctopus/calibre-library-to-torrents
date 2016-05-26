@@ -1,4 +1,4 @@
-[Calibre Library to Torrents]() &mdash; Convert your Calibre Library to Torrents
+[Calibre Library to Torrents]() &mdash; Convert your Calibre Library Books to Torrents
 ==========
 ![](http://img.shields.io/version/0.0.1.png?color=green)
 
