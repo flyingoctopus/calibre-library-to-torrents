@@ -17,31 +17,35 @@ import com.frostwire.jlibtorrent.AnnounceEntry;
 
 public class DataSources {
 
-//	public static final String LIBTORRENT_OS_LIBRARY_PATH() {
-//		String osName = System.getProperty("os.name").toLowerCase();
-//		String jvmBits = System.getProperty("sun.arch.data.model");
-//		log.info("Operating system: " + osName + ", JVM bits: " + jvmBits);
-//
-//		String ret = null;
-//		if (osName.contains("linux")) {
-//			if (jvmBits.equals("32")) {
-//				ret = SOURCE_CODE_HOME() + "/lib/x86/libjlibtorrent.so";
-//			} else {
-//				ret = SOURCE_CODE_HOME() + "/lib/x86_64/libjlibtorrent.so";
-//			}
-//		} else if (osName.contains("windows")) {
-//			if (jvmBits.equals("32")) {
-//				ret = SOURCE_CODE_HOME() + "/lib/x86/jlibtorrent.dll";
-//			} else {
-//				ret = SOURCE_CODE_HOME() + "/lib/x86_64/jlibtorrent.dll";
-//			}
-//		} else if (osName.contains("mac")) {
-//			ret = SOURCE_CODE_HOME() + "/lib/x86_64/libjlibtorrent.dylib";
-//		}
-//
-//		log.info("Using libtorrent @ " + ret);
-//		return ret;
-//	}
+	static final Logger log = LoggerFactory.getLogger(DataSources.class);
+
+	public static File SOURCE_CODE_HOME;
+
+	public static final String LIBTORRENT_OS_LIBRARY_PATH() {
+		String osName = System.getProperty("os.name").toLowerCase();
+		String jvmBits = System.getProperty("sun.arch.data.model");
+		log.info("Operating system: " + osName + ", JVM bits: " + jvmBits);
+
+		String ret = null;
+		if (osName.contains("linux")) {
+			if (jvmBits.equals("32")) {
+				ret = SOURCE_CODE_HOME + "/lib/x86/libjlibtorrent.so";
+			} else {
+				ret = SOURCE_CODE_HOME + "/lib/x86_64/libjlibtorrent.so";
+			}
+		} else if (osName.contains("windows")) {
+			if (jvmBits.equals("32")) {
+				ret = SOURCE_CODE_HOME + "/lib/x86/jlibtorrent.dll";
+			} else {
+				ret = SOURCE_CODE_HOME + "/lib/x86_64/jlibtorrent.dll";
+			}
+		} else if (osName.contains("mac")) {
+			ret = SOURCE_CODE_HOME + "/lib/x86_64/libjlibtorrent.dylib";
+		}
+
+		log.info("Using libtorrent @ " + ret);
+		return ret;
+	}
 
 	public static final List<URI> ANNOUNCE_LIST() {
 		List<URI> list = null;

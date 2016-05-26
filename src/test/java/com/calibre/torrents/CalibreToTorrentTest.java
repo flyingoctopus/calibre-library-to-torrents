@@ -8,6 +8,12 @@ public class CalibreToTorrentTest {
 
     private Collection collection;
 
+    @Before
+    public void setUp() {
+        collection = new ArrayList();
+        System.out.println("@Before - setUp");
+    }
+
     @Test
     public void testOneItemCollection() {
         collection.add("itemA");

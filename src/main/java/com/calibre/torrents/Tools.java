@@ -6,19 +6,21 @@ import com.frostwire.jlibtorrent.swig.error_code;
 import com.frostwire.jlibtorrent.swig.file_storage;
 import com.frostwire.jlibtorrent.swig.libtorrent;
 import com.calibre.torrents.DataSources;
+import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class Tools {
 
@@ -123,6 +125,97 @@ public class Tools {
 	}
 
 
+	public static void extractResources() {
 
+		try {
+
+			File currentJar = new File(Tools.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+
+			File tmpResourcesFolder = Files.createTempDir();
+
+			DataSources.SOURCE_CODE_HOME = tmpResourcesFolder;
+
+			log.debug("Copying resources to temp libs folder for torrent library");
+
+			// Unzip it and rename it
+			Tools.unzip(currentJar, tmpResourcesFolder);
+
+
+		} catch(URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void unzip(File zipfile, File directory) {
+		try {
+			ZipFile zfile = new ZipFile(zipfile);
+			Enumeration<? extends ZipEntry> entries = zfile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				File file = new File(directory, entry.getName());
+				if (entry.isDirectory()) {
+					file.mkdirs();
+				} else {
+					file.getParentFile().mkdirs();
+					InputStream in = zfile.getInputStream(entry);
+					try {
+						copy(in, file);
+					} finally {
+						in.close();
+					}
+				}
+			}
+
+			zfile.close();
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void copy(InputStream in, File file) throws IOException {
+		OutputStream out = new FileOutputStream(file);
+		try {
+			copy(in, out);
+		} finally {
+			out.close();
+		}
+	}
+
+	private static void copy(InputStream in, OutputStream out) throws IOException {
+		byte[] buffer = new byte[1024];
+		while (true) {
+			int readCount = in.read(buffer);
+			if (readCount < 0) {
+				break;
+			}
+			out.write(buffer, 0, readCount);
+		}
+	}
+
+	private static void copy(File file, OutputStream out) throws IOException {
+		InputStream in = new FileInputStream(file);
+		try {
+			copy(in, out);
+		} finally {
+			in.close();
+		}
+	}
+
+	public static void deleteResourcesOnShutdown() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					FileUtils.deleteDirectory(DataSources.SOURCE_CODE_HOME);
+					log.debug("Temp libs folder deleted");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }
 

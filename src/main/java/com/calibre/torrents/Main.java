@@ -2,12 +2,17 @@ package com.calibre.torrents;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.frostwire.jlibtorrent.LibTorrent;
+import org.apache.commons.io.FileUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.*;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 
 public class Main {
@@ -17,11 +22,13 @@ public class Main {
 	@Option(name="-loglevel", usage="Sets the log level [INFO, DEBUG, etc.]")
 	private String loglevel = "INFO";
 
-	@Option(name="-calibre_dir", usage="Sets the calibre dir to scan, usually at ~/Calibre Library", required = true)
-	private String calibreDir = null;
+	@Option(name="-calibre_dir", usage="Sets the calibre dir to scan, usually at ~/Calibre\\ Library",
+			required = true)
+	private File calibreDir = null;
 
-	@Option(name="-torrents_dir", usage="Where to save the torrents", required = true)
-	private String torrentsDir = null;
+	@Option(name="-torrents_dir", usage="Where to save the torrents",
+			required = true)
+	private File torrentsDir = null;
 
 
 	public void doMain(String[] args) {
@@ -30,7 +37,21 @@ public class Main {
 
 		log.setLevel(Level.toLevel(loglevel));
 
-		ScanDirectory.start(new File(calibreDir), new File(torrentsDir));
+		if (!torrentsDir.exists()) {
+			log.error("The torrents directory " + torrentsDir.getAbsolutePath() + " doesn't exist");
+			System.exit(0);
+		}
+
+		// Extract the torrent libraries
+		Tools.extractResources();
+
+		// Setting up libtorrent
+		System.setProperty("jlibtorrent.jni.path", DataSources.LIBTORRENT_OS_LIBRARY_PATH());
+		log.info("Starting up libtorrent with version: " + LibTorrent.version());
+
+		ScanDirectory.start(calibreDir, torrentsDir);
+
+		Tools.deleteResourcesOnShutdown();
 
 	}
 
@@ -61,7 +82,6 @@ public class Main {
 
 	public static void main(String[] args) {
 		new Main().doMain(args);
-
 	}
 
 

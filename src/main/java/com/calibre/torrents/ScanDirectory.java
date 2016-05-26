@@ -1,27 +1,10 @@
 package com.calibre.torrents;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
-import com.calibre.torrents.db.Actions;
-import com.calibre.torrents.db.Tables;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.codehaus.jackson.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.frostwire.jlibtorrent.TorrentHandle;
-import com.musicbrainz.mp3.tagger.Tools.Song;
+import java.io.File;
+import java.util.*;
 
 
 public class ScanDirectory {
@@ -44,59 +27,49 @@ public class ScanDirectory {
 		
 		log.info("Scanning directory: " + calibreDir.getAbsolutePath());
 		
-		Set<ScanInfo> newScanInfos = new LinkedHashSet<ScanInfo>();
+		Set<ScanInfo> scanInfos = new LinkedHashSet<ScanInfo>();
 
-		List<File> files = fetchUntaggedSongsFromDir(dir);
+		List<File>authorFolders = Arrays.asList(calibreDir.listFiles(File::isDirectory));
+		Collections.sort(authorFolders);
 
-		log.info("Author folders: ");
-		for (File file : files) {
-			log.info(file.getAbsolutePath());
+		log.info("Authors: ");
+		for (File file : authorFolders) {
+			log.info("\t" + file.getName());
 		};
 
-		Set<ScanInfo> scanInfos = LibtorrentEngine.INSTANCE.getScanInfos();
 		// Use ScanInfo to keep track of operations and messages while you're doing them
 
-
 		// The main scanning loop
-		for (File file : files) {
+		for (File authorFolder : authorFolders) {
 
-			// Create a scanInfo from it, check if its a new one added
-			ScanInfo si = ScanInfo.create(file);
+			List<File> bookFolders = Arrays.asList(authorFolder.listFiles(File::isDirectory));
+			Collections.sort(bookFolders);
+
+			log.info("Author: " + authorFolder.getName());
+			log.info("\tBooks: ");
+			for (File bookFolder : bookFolders) {
+				log.info("\t\t" + bookFolder.getName());
+
+				// Create a scanInfo from it, check if its a new one added
+				ScanInfo si = ScanInfo.create(bookFolder);
+
+				// Add it to the new scan infos
+				scanInfos.add(si);
+
+				// Scan the metadata opf to get the name, and identifier
+				si.setStatus(ScanStatus.Scanning);
+
+
+				// Create a torrent for the file, put it in the torrents dir
+				si.setStatus(ScanStatus.CreatingTorrent);
+				File torrentFile = createAndSaveTorrent(si);
+
+
+			};
+
+
+
 			
-			// Add it to the new scan infos
-			newScanInfos.add(si);
-			boolean isNew = scanInfos.add(si);
-
-
-			//			if (isNew) {
-
-			// Fetch the song MBID
-			si.setStatus(ScanStatus.Scanning);
-			si.setStatus(ScanStatus.FetchingMusicBrainzId);
-
-
-
-			log.info("Querying file: " + file.getAbsolutePath());
-			Song song = null;
-			try {
-				song = Song.fetchSong(si.getFile());
-				log.info("MusicBrainz query: " + song.getQuery());
-				si.setMbid(song.getRecordingMBID());
-			}
-			// Couldn't find the song
-			catch (NoSuchElementException | NullPointerException | NumberFormatException e) {
-				log.error("Couldn't Find MusicBrainz ID for File: " + file.getAbsolutePath());
-
-				si.setStatus(ScanStatus.MusicBrainzError);
-				continue;
-			}
-
-
-
-			// Create a torrent for the file, put it in the /.app/torrents dir
-			si.setStatus(ScanStatus.CreatingTorrent);
-			File torrentFile = createAndSaveTorrent(si, song);
-
 
 
 		}
@@ -105,20 +78,18 @@ public class ScanDirectory {
 
 		log.info("Done scanning");
 		
-		return newScanInfos;
+		return scanInfos;
 
 	}
 
 
-	public static File createAndSaveTorrent(ScanInfo si, Song song) {
+	public File createAndSaveTorrent(ScanInfo si) {
 
-		String torrentFileName = Tools.constructTrackTorrentFilename(
-				si.getFile(), song);
-		File torrentFile = new File(DataSources.TORRENTS_DIR() + "/" + torrentFileName + ".torrent");
+		String torrentFileName = si.getBookFolder().getName(); // TODO generate from opf
 
-		return Tools.createAndSaveTorrent(torrentFile, si.getFile());
+		File torrentFile = new File(torrentsDir + "/" + torrentFileName + ".torrent");
 
-
+		return Tools.createAndSaveTorrent(torrentFile, si.getBookFolder());
 
 	}
 
@@ -147,23 +118,19 @@ public class ScanDirectory {
 	}
 
 	public static class ScanInfo {
-		private File authorFolder;
+		private File bookFolder;
 		private ScanStatus status;
 
-		public static ScanInfo create(File authorFolder) {
-			return new ScanInfo(authorFolder);
+		public static ScanInfo create(File bookFOlder) {
+			return new ScanInfo(bookFOlder);
 		}
 		private ScanInfo(File authorFolder) {
-			this.authorFolder = authorFolder;
+			this.bookFolder = authorFolder;
 			this.status = ScanStatus.Pending;
 		}
 
-		public File getFile() {
-			return file;
-		}
-
-		public String getFileName() {
-			return file.getName();
+		public File getBookFolder() {
+			return bookFolder;
 		}
 
 		public ScanStatus getStatus() {
@@ -175,22 +142,11 @@ public class ScanDirectory {
 		}
 
 		public void setStatus(ScanStatus status) {
-			log.debug("Status for " + file.getName() + " : " + status.toString());
+			log.debug("Status for " + bookFolder.getName() + " : " + status.toString());
 			this.status = status;
 		}
 
 	}
-
-
-	public File getDir() {
-		return dir;
-	}
-
-
-
-
-
-
 
 
 }
