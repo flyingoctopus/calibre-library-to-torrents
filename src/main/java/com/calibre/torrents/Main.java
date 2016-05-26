@@ -9,10 +9,12 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.*;
 import org.slf4j.LoggerFactory;
+import com.calibre.torrents.ScanDirectory.ScanInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 
 public class Main {
@@ -42,12 +44,12 @@ public class Main {
 			System.exit(0);
 		}
 
-		// Extract the torrent libraries
+		// Necessary for the torrent libraries
 		Tools.extractResources();
 
 		// Setting up libtorrent
 		System.setProperty("jlibtorrent.jni.path", DataSources.LIBTORRENT_OS_LIBRARY_PATH());
-		log.info("Starting up libtorrent with version: " + LibTorrent.version());
+		log.info("Libtorrent Version: " + LibTorrent.version());
 
 		ScanDirectory.start(calibreDir, torrentsDir);
 

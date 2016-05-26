@@ -7,6 +7,8 @@ import com.frostwire.jlibtorrent.swig.file_storage;
 import com.frostwire.jlibtorrent.swig.libtorrent;
 import com.calibre.torrents.DataSources;
 import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
@@ -26,6 +29,9 @@ public class Tools {
 
 	static final Logger log = LoggerFactory.getLogger(Tools.class);
 
+	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+	public static final SimpleDateFormat SDF = new SimpleDateFormat("YYYY");
 
 
 	public static String readFile(String path) {
@@ -61,11 +67,13 @@ public class Tools {
 
 	public static Long folderSize(File directory) {
 		long length = 0;
-		log.info("folder size directory: " + directory);
-		Collection<File> files = FileUtils.listFiles(directory, new String[]{}, true);
+
+		Collection<File> files = FileUtils.listFiles(directory, null, true);
 		for (File file : files) {
 			length += file.length();
 		}
+		log.info("# of books: " + files.size());
+
 		return length;
 
 	}
