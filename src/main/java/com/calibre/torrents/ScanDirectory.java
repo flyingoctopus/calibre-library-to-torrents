@@ -1,5 +1,6 @@
 package com.calibre.torrents;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -11,6 +12,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -20,7 +24,7 @@ public class ScanDirectory {
 
     static final Logger log = LoggerFactory.getLogger(ScanDirectory.class);
 
-    private File calibreDir, torrentsDir;
+    private File calibreDir, torrentsDir, delugeAdds, delugeRemoves;
 
     public static Set<ScanInfo> start(File calibreDir, File torrentsDir) {
         ScanDirectory sd = new ScanDirectory(calibreDir, torrentsDir);
@@ -30,6 +34,8 @@ public class ScanDirectory {
     private ScanDirectory(File calibreDir, File torrentsDir) {
         this.calibreDir = calibreDir;
         this.torrentsDir = torrentsDir;
+
+        createDelugeFiles();
     }
 
     private Set<ScanInfo> scan() {
@@ -66,13 +72,14 @@ public class ScanDirectory {
                 si.setStatus(ScanStatus.CreatingTorrent);
                 File torrentFile = createAndSaveTorrent(si);
 
+                appendToDelugeFiles(bookFolder, torrentFile);
+
                 si.setStatus(ScanStatus.Done);
 
                 log.info("\n");
             }
 
         }
-
 
         log.info("Done scanning.");
 
@@ -81,6 +88,46 @@ public class ScanDirectory {
 
         return scanInfos;
 
+    }
+
+    private void createDelugeFiles() {
+        try {
+            this.delugeAdds = new File(torrentsDir, "deluge_adds.sh");
+            if (this.delugeAdds.exists()) {
+                this.delugeAdds.delete();
+            }
+
+            this.delugeAdds.createNewFile();
+            this.delugeAdds.setExecutable(true);
+
+            this.delugeRemoves = new File(torrentsDir, "deluge_removes.sh");
+            if (this.delugeRemoves.exists()) {
+                this.delugeRemoves.delete();
+            }
+
+            this.delugeRemoves.createNewFile();
+            this.delugeRemoves.setExecutable(true);
+
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void appendToDelugeFiles(File bookFolder, File torrentFile) {
+        try {
+            String delugeAddLine = "deluge-console \"add -p " + delugeConsoleReplace(bookFolder.getParentFile().getAbsolutePath()) + " " + delugeConsoleReplace(torrentFile.getAbsolutePath()) + "\"\n";
+            String delugeRemoveLine = "deluge-console rm \"" + torrentFile.getName() + "\"\n";
+
+            Files.write(delugeAdds.toPath(), delugeAddLine.getBytes(), StandardOpenOption.APPEND);
+            Files.write(delugeRemoves.toPath(), delugeRemoveLine.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String delugeConsoleReplace(String s) {
+        String a = s.replaceAll("\\s+", "\\\\ ").replaceAll("'", "\\\\'");
+        return a;
     }
 
 

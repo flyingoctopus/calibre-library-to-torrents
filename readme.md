@@ -32,7 +32,6 @@ To build CalibreToTorrents, run the following commands:
 ```sh
 git clone https://github.com/tchoulihan/calibre-library-to-torrents
 cd calibre-library-to-torrents
-chmod +x install.sh
 
 # This script does a maven install, and java -jar command
 ./install.sh -calibre_dir ~/Calibre\ Library/ -torrents_dir save_dir/

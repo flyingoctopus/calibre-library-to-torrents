@@ -40,8 +40,8 @@ public class Main {
 		log.setLevel(Level.toLevel(loglevel));
 
 		if (!torrentsDir.exists()) {
-			log.error("The torrents directory " + torrentsDir.getAbsolutePath() + " doesn't exist");
-			System.exit(0);
+			log.info("Creating the torrents directory " + torrentsDir.getAbsolutePath());
+			torrentsDir.mkdirs();
 		}
 
 		// Necessary for the torrent libraries
